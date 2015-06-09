@@ -6,13 +6,25 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/cloud66/pink-panther/logger"
 	log "gopkg.in/inconshreveable/log15.v2"
 )
 
 var Log = log.New()
 
 func hello(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if r := recover(); r != nil {
+			Log.Info("Unhandled Error!")
+			err, ok := r.(error)
+			if ok {
+				Log.Info("FATAL: Unhandled Error! " + err.Error())
+			} else {
+				Log.Info("FATAL: Unhandled Error!")
+			}
+			os.Exit(2)
+			return
+		}
+	}()
 
 	/*	var (
 			cmdOut []byte
@@ -58,7 +70,6 @@ func main() {
 			err, ok := r.(error)
 			if ok {
 				Log.Info("FATAL: Unhandled Error! " + err.Error())
-				logger.Log.Crit(err)
 			} else {
 				Log.Info("FATAL: Unhandled Error!")
 			}
