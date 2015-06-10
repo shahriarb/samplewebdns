@@ -5,6 +5,8 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	log "gopkg.in/inconshreveable/log15.v2"
 )
@@ -64,6 +66,10 @@ func hello(w http.ResponseWriter, r *http.Request) {
 func main() {
 	Log.SetHandler(log.StdoutHandler)
 
+	// listen to signals
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+
 	defer func() {
 		if r := recover(); r != nil {
 			Log.Info("Unhandled Error!")
@@ -75,6 +81,16 @@ func main() {
 			}
 			os.Exit(2)
 			return
+		}
+	}()
+
+	go func() {
+		for {
+			select {
+			case sig := <-signalChan:
+				Log.Info("FATAL: Unhandled Error! Signal: " + sig.String())
+				return
+			}
 		}
 	}()
 
