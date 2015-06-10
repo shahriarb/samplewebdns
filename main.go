@@ -88,7 +88,7 @@ func main() {
 		for {
 			select {
 			case sig := <-signalChan:
-				Log.Info("FATAL: Unhandled Error! Signal: " + sig.String())
+				Log.Info("Signal! (" + sig.String() + ")")
 				return
 			}
 		}
