@@ -50,8 +50,13 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "\n  contents of resolv.conf : \n")
 
 	content, err := ioutil.ReadFile("/etc/resolv.conf")
-	if err != nil {
+	if err == nil {
 		w.Write(content)
+	} else {
+		Log.Info("Read resolve Error  start: ")
+		Log.Info(err.Error())
+		Log.Info("Read resolve Error  finished: ")
+		io.WriteString(w, err.Error())
 	}
 
 	Log.Info("Hello Request: END")
