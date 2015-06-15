@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -28,24 +29,10 @@ func hello(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	/*	var (
-			cmdOut []byte
-			err    error
-		)
-	*/
 	Log.Info("Hello Request: START")
 
 	hostname := r.URL.Query().Get("hostname")
 	if len(hostname) != 0 {
-		/*		cmdName := "dig"
-				cmdArgs := []string{"@localhost", hostname}
-
-				if cmdOut, err = exec.Command(cmdName, cmdArgs...).Output(); err != nil {
-					io.WriteString(w, err.Error())
-				} else {
-					io.WriteString(w, string(cmdOut))
-				}*/
-
 		if ip, err := net.ResolveIPAddr("ip4", hostname); err != nil {
 			io.WriteString(w, err.Error())
 			Log.Info("Hello Request: Error: " + err.Error())
@@ -57,6 +44,13 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	} else {
 		io.WriteString(w, "There is no hostname !")
 		Log.Info("Hello Request: There is no hostname!")
+	}
+
+	io.WriteString(w, "\n  contents of resolv.conf : \n")
+
+	content, err := ioutil.ReadFile("/etc/resolv.conf")
+	if err != nil {
+		w.Write(content)
 	}
 
 	Log.Info("Hello Request: END")
